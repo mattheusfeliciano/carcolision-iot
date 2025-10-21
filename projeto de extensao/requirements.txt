@@ -1,0 +1,4 @@
+# Dependências do Sistema de Detecção de Colisão
+paho-mqtt>=1.6.1
+
+colorama>=0.4.6

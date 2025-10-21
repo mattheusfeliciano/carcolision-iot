@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema Avançado de Detecção de Colisão IoT</title>
+    
+    <!-- CDNs -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#06B6D4',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        success: '#10B981'
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'spin-slow': 'spin 3s linear infinite',
+                        'ping-slow': 'ping 2s cubic-bezier(0, 0, 0.2, 1) infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .neon-border {
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+        
+        .tech-gradient {
+            background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+        }
+        
+        .data-point {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .data-point:hover {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: rgba(100, 116, 139, 0.4);
+            transform: translateY(-2px);
+        }
+        
+        .sensor-active {
+            animation: sensor-pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes sensor-pulse {
+            0%, 100% { 
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 0 15px rgba(59, 130, 246, 0);
+                transform: scale(1.05);
+            }
+        }
+        
+        .road-container {
+            background: linear-gradient(90deg, #1E293B 0%, #334155 50%, #1E293B 100%);
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .road-container::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 20px,
+                #60A5FA 20px,
+                #60A5FA 40px
+            );
+            transform: translateY(-50%);
+            animation: road-move 2s linear infinite;
+        }
+        
+        @keyframes road-move {
+            0% { transform: translateY(-50%) translateX(0); }
+            100% { transform: translateY(-50%) translateX(-60px); }
+        }
+        
+        .car-movement {
+            transition: left 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .console-tech {
+            background: #0F172A;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .console-tech::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .console-tech::-webkit-scrollbar-track {
+            background: #1E293B;
+            border-radius: 3px;
+        }
+        
+        .console-tech::-webkit-scrollbar-thumb {
+            background-color: #475569;
+            border-radius: 3px;
+        }
+        
+        .status-indicator {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .status-indicator::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+            animation: status-scan 3s linear infinite;
+        }
+        
+        @keyframes status-scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .collision-alert {
+            animation: collision-alert 0.8s ease-out;
+        }
+        
+        @keyframes collision-alert {
+            0%, 100% { 
+                background-color: rgba(239, 68, 68, 0.1);
+                transform: scale(1);
+            }
+            50% { 
+                background-color: rgba(239, 68, 68, 0.4);
+                transform: scale(1.02);
+            }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+        }
+        
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #06B6D4);
+            background-size: 200% 100%;
+            animation: progress-shift 2s ease-in-out infinite;
+        }
+        
+        @keyframes progress-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.8));
+            border: 1px solid rgba(100, 116, 139, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            border-color: rgba(100, 116, 139, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563EB, #7C3AED);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #DC2626, #B91C1C);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10B981, #059669);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669, #047857);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Notification Container -->
+    <div id="notificationContainer" class="notification"></div>
+    
+    <div id="app" class="p-4 md:p-6 lg:p-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+                    🚗 Sistema Avançado de Detecção de Colisão IoT
+                </h1>
+                <p class="text-gray-400 text-sm md:text-base font-light max-w-2xl mx-auto">
+                    Monitoramento em tempo real com MQTT, análise estatística avançada e interface moderna
+                </p>
+                <div class="mt-4 flex justify-center items-center gap-4 text-sm text-gray-500">
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                        <span>Sistema Online</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                        <span>MQTT Ativo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Dashboard -->
+            <div class="glass-effect rounded-2xl overflow-hidden neon-border">
+                
+                <!-- Status Bar -->
+                <div class="tech-gradient px-6 py-6 border-b border-gray-700">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Status MQTT</p>
+                            <div id="mqttStatus" class="text-xl font-bold text-red-400 transition-colors duration-300 flex items-center gap-2">
+                                <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                                Desconectado
+                            </div>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Tempo Ativo</p>
+                            <p id="timer" class="text-xl font-bold text-blue-400 mono">00:00:00</p>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Distância</p>
+                            <p id="distanceDisplay" class="text-xl font-bold text-amber-400">100.0cm</p>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Colisões</p>
+                            <p id="collisionCount" class="text-xl font-bold text-red-400">0</p>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Velocidade</p>
+                            <p id="speedDisplay" class="text-xl font-bold text-green-400">0%</p>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 status-indicator">
+                            <p class="text-gray-400 text-xs font-medium uppercase tracking-wide">Taxa/Min</p>
+                            <p id="rateDisplay" class="text-xl font-bold text-purple-400">0.0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="p-6">
+                    <!-- Road Simulation -->
+                    <div class="mb-8">
+                        <div class="relative road-container rounded-xl h-24 overflow-hidden mb-4">
+                            <!-- Obstacle -->
+                            <div class="absolute right-0 top-0 h-full w-16 bg-gradient-to-r from-red-500/90 to-red-600/90 flex items-center justify-center">
+                                <span class="text-2xl">🧱</span>
+                            </div>
+                            
+                            <!-- Distance Indicator -->
+                            <div id="distanceIndicator" class="absolute top-2 right-20 bg-amber-400/90 px-3 py-1 rounded-lg text-sm font-bold text-black">
+                                100.0cm
+                            </div>
+                            
+                            <!-- Car -->
+                            <div id="car" class="absolute top-1/2 transform -translate-y-1/2 car-movement" style="left: 50%">
+                                <span class="text-2xl transition-transform duration-300">🚗</span>
+                            </div>
+                            
+                            <!-- Collision Overlay -->
+                            <div id="collisionOverlay" class="absolute inset-0 bg-red-500/40 opacity-0 flex items-center justify-center transition-opacity duration-500 hidden">
+                                <div class="text-center">
+                                    <i data-feather="alert-triangle" class="w-12 h-12 text-red-400 mx-auto mb-2"></i>
+                                    <p class="text-red-400 font-bold text-lg">COLISÃO DETECTADA!</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-full bg-gray-700 rounded-full h-2 mb-2">
+                            <div id="progressBar" class="progress-bar h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        
+                        <!-- Speed Control -->
+                        <div class="flex items-center gap-4">
+                            <label class="text-sm font-medium text-gray-300">Velocidade:</label>
+                            <input id="speedSlider" type="range" min="0" max="2" step="0.1" value="0" 
+                                   class="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer 
+                                          [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 
+                                          [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full 
+                                          [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:cursor-pointer"/>
+                            <button id="accelerateBtn" class="btn-primary px-4 py-2 rounded-lg font-medium flex items-center gap-2">
+                                <i data-feather="zap" class="w-4 h-4"></i>
+                                ACELERAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Control Panel -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <button id="startBtn" class="btn-success py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-feather="play" class="w-5 h-5"></i>
+                            INICIAR SIMULAÇÃO
+                        </button>
+                        <button id="stopBtn" class="btn-danger py-3 rounded-xl font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-feather="pause" class="w-5 h-5"></i>
+                            PARAR SIMULAÇÃO
+                        </button>
+                        <button id="resetBtn" class="btn-primary py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                            <i data-feather="rotate-ccw" class="w-5 h-5"></i>
+                            RESETAR SISTEMA
+                        </button>
+                    </div>
+
+                    <!-- MQTT Configuration -->
+                    <div class="glass-effect rounded-xl p-6 mb-8">
+                        <h3 class="font-semibold text-lg text-white mb-4 flex items-center gap-2">
+                            <i data-feather="radio" class="w-5 h-5"></i>
+                            Configuração MQTT
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Servidor MQTT</label>
+                                <input id="mqttServer" type="text" placeholder="localhost" 
+                                       value="localhost" 
+                                       class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white 
+                                              focus:outline-none focus:border-blue-400 transition-colors"/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Porta</label>
+                                <input id="mqttPort" type="number" placeholder="8081" value="8081" 
+                                       class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white 
+                                              focus:outline-none focus:border-blue-400 transition-colors"/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Usuário</label>
+                                <input id="mqttUsername" type="text" placeholder="(sem autenticação)" value=""
+                                       class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white 
+                                              focus:outline-none focus:border-blue-400 transition-colors"/>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300 mb-2">Tópico</label>
+                                <input id="mqttTopic" type="text" placeholder="vini123/colisao" value="vini123/colisao"
+                                       class="w-full px-4 py-3 bg-gray-800/50 border border-gray-600 rounded-lg text-white 
+                                              focus:outline-none focus:border-blue-400 transition-colors"/>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <button id="connectMqttBtn" class="btn-primary px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                                <i data-feather="wifi" class="w-4 h-4"></i>
+                                CONECTAR MQTT
+                            </button>
+                            <button id="disconnectMqttBtn" class="btn-danger px-6 py-3 rounded-lg font-medium flex items-center gap-2 hidden">
+                                <i data-feather="wifi-off" class="w-4 h-4"></i>
+                                DESCONECTAR
+                            </button>
+                        </div>
+                        <div id="mqttStatusText" class="mt-4 text-sm text-center text-gray-400">
+                            Status: Aguardando conexão...
+                        </div>
+                    </div>
+
+                    <!-- Charts Section -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <!-- Distance Chart -->
+                        <div class="glass-effect rounded-xl p-6">
+                            <h3 class="font-semibold text-lg text-white mb-4">Distância em Tempo Real</h3>
+                            <div class="chart-container">
+                                <canvas id="distanceChart"></canvas>
+                            </div>
+                        </div>
+                        
+                        <!-- Collision Rate Chart -->
+                        <div class="glass-effect rounded-xl p-6">
+                            <h3 class="font-semibold text-lg text-white mb-4">Taxa de Colisões</h3>
+                            <div class="chart-container">
+                                <canvas id="collisionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerts Section -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div id="distanceAlert" class="metric-card p-4 rounded-xl text-center">
+                            <div class="text-2xl mb-2">✅</div>
+                            <p class="font-medium text-gray-300">DISTÂNCIA SEGURA</p>
+                        </div>
+                        <div id="collisionAlert" class="metric-card p-4 rounded-xl text-center">
+                            <div class="text-2xl mb-2">🛑</div>
+                            <p class="font-medium text-gray-300">SEM COLISÃO</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Console -->
+                <div class="console-tech text-green-400 p-6 font-mono text-sm max-h-48 overflow-y-auto">
+                    <div class="mb-3 text-gray-500 text-sm font-medium">CONSOLE DE EVENTOS</div>
+                    <div id="consoleLogs">
+                        <div class="mb-2">
+                            <span class="text-gray-500" id="initialTime"></span> Sistema inicializado com sucesso...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Footer -->
+                <div class="tech-gradient px-6 py-6 border-t border-gray-700">
+                    <h3 class="font-semibold text-gray-300 mb-4 text-lg">Estatísticas Avançadas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div class="metric-card p-4 text-center">
+                            <p class="text-gray-400 text-sm mb-1">Total de Colisões</p>
+                            <p id="statsCollisions" class="text-2xl font-bold text-red-400">0</p>
+                        </div>
+                        <div class="metric-card p-4 text-center">
+                            <p class="text-gray-400 text-sm mb-1">Distância Mínima</p>
+                            <p id="statsMinDistance" class="text-2xl font-bold text-amber-400">100cm</p>
+                        </div>
+                        <div class="metric-card p-4 text-center">
+                            <p class="text-gray-400 text-sm mb-1">Velocidade Máxima</p>
+                            <p id="statsMaxSpeed" class="text-2xl font-bold text-green-400">0%</p>
+                        </div>
+                        <div class="metric-card p-4 text-center">
+                            <p class="text-gray-400 text-sm mb-1">Tempo Total</p>
+                            <p id="statsTotalTime" class="text-2xl font-bold text-blue-400">00:00:00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced State Management
+        let state = {
+            isRunning: false,
+            carX: 50,
+            distance: 100,
+            speed: 0,
+            collisions: 0,
+            isColliding: false,
+            mqttConnected: false,
+            time: '00:00:00',
+            minDistance: 100,
+            maxSpeed: 0,
+            totalTime: 0,
+            collisionRate: 0,
+            mqttClient: null,
+            charts: {
+                distance: null,
+                collision: null
+            },
+            dataPoints: {
+                distance: [],
+                collisions: [],
+                timestamps: []
+            }
+        };
+
+        // DOM Elements
+        const elements = {
+            car: document.getElementById('car'),
+            distanceIndicator: document.getElementById('distanceIndicator'),
+            collisionOverlay: document.getElementById('collisionOverlay'),
+            mqttStatus: document.getElementById('mqttStatus'),
+            timer: document.getElementById('timer'),
+            distanceDisplay: document.getElementById('distanceDisplay'),
+            collisionCount: document.getElementById('collisionCount'),
+            speedDisplay: document.getElementById('speedDisplay'),
+            rateDisplay: document.getElementById('rateDisplay'),
+            speedSlider: document.getElementById('speedSlider'),
+            progressBar: document.getElementById('progressBar'),
+            startBtn: document.getElementById('startBtn'),
+            stopBtn: document.getElementById('stopBtn'),
+            resetBtn: document.getElementById('resetBtn'),
+            accelerateBtn: document.getElementById('accelerateBtn'),
+            connectMqttBtn: document.getElementById('connectMqttBtn'),
+            disconnectMqttBtn: document.getElementById('disconnectMqttBtn'),
+            mqttStatusText: document.getElementById('mqttStatusText'),
+            distanceAlert: document.getElementById('distanceAlert'),
+            collisionAlert: document.getElementById('collisionAlert'),
+            consoleLogs: document.getElementById('consoleLogs'),
+            statsCollisions: document.getElementById('statsCollisions'),
+            statsMinDistance: document.getElementById('statsMinDistance'),
+            statsMaxSpeed: document.getElementById('statsMaxSpeed'),
+            statsTotalTime: document.getElementById('statsTotalTime'),
+            mqttServer: document.getElementById('mqttServer'),
+            mqttPort: document.getElementById('mqttPort'),
+            mqttUsername: document.getElementById('mqttUsername'),
+            mqttTopic: document.getElementById('mqttTopic'),
+            notificationContainer: document.getElementById('notificationContainer')
+        };
+
+        // Initialize Charts
+        function initCharts() {
+            // Distance Chart
+            const distanceCtx = document.getElementById('distanceChart').getContext('2d');
+            state.charts.distance = new Chart(distanceCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Distância (cm)',
+                        data: [],
+                        borderColor: '#F59E0B',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#9CA3AF' }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            ticks: { color: '#9CA3AF' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        },
+                        y: { 
+                            ticks: { color: '#9CA3AF' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        }
+                    }
+                }
+            });
+
+            // Collision Rate Chart
+            const collisionCtx = document.getElementById('collisionChart').getContext('2d');
+            state.charts.collision = new Chart(collisionCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Último Minuto', 'Últimos 5 Min', 'Últimos 10 Min'],
+                    datasets: [{
+                        label: 'Colisões',
+                        data: [0, 0, 0],
+                        backgroundColor: ['#EF4444', '#F59E0B', '#10B981'],
+                        borderColor: ['#DC2626', '#D97706', '#059669'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: { color: '#9CA3AF' }
+                        }
+                    },
+                    scales: {
+                        x: { 
+                            ticks: { color: '#9CA3AF' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        },
+                        y: { 
+                            ticks: { color: '#9CA3AF' },
+                            grid: { color: 'rgba(156, 163, 175, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `p-4 rounded-lg shadow-lg mb-2 ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+            } text-white`;
+            notification.textContent = message;
+            
+            elements.notificationContainer.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Enhanced Logging
+        function addLog(message, type = 'info') {
+            const now = new Date();
+            const logEntry = document.createElement('div');
+            logEntry.className = 'mb-2';
+            
+            const icon = type === 'error' ? '❌' : 
+                        type === 'warning' ? '⚠️' : 
+                        type === 'success' ? '✅' : 'ℹ️';
+            
+            logEntry.innerHTML = `
+                <span class="text-gray-500">[${now.toLocaleTimeString()}]</span> 
+                <span class="text-gray-300">${icon} ${message}</span>
+            `;
+            
+            elements.consoleLogs.appendChild(logEntry);
+            elements.consoleLogs.scrollTop = elements.consoleLogs.scrollHeight;
+            
+            if (elements.consoleLogs.children.length > 20) {
+                elements.consoleLogs.removeChild(elements.consoleLogs.children[0]);
+            }
+        }
+
+        // Enhanced UI Updates
+        function updateUI() {
+            elements.car.style.left = `${state.carX}%`;
+            elements.distanceIndicator.textContent = `${state.distance.toFixed(1)}cm`;
+            elements.distanceDisplay.textContent = `${state.distance.toFixed(1)}cm`;
+            elements.speedDisplay.textContent = `${Math.round(state.speed * 50)}%`;
+            elements.collisionCount.textContent = state.collisions;
+            elements.rateDisplay.textContent = state.collisionRate.toFixed(1);
+            
+            // Progress bar
+            const progress = Math.max(0, Math.min(100, (100 - state.distance) * 2));
+            elements.progressBar.style.width = `${progress}%`;
+            
+            // MQTT Status
+            if (state.mqttConnected) {
+                elements.mqttStatus.innerHTML = `
+                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                    Conectado
+                `;
+                elements.mqttStatus.className = 'text-xl font-bold text-green-400 transition-colors duration-300 flex items-center gap-2';
+                elements.mqttStatusText.textContent = 'Status: Conectado ao broker MQTT';
+                elements.mqttStatusText.className = 'mt-4 text-sm text-center text-green-400';
+                elements.connectMqttBtn.classList.add('hidden');
+                elements.disconnectMqttBtn.classList.remove('hidden');
+            } else {
+                elements.mqttStatus.innerHTML = `
+                    <div class="w-2 h-2 bg-red-400 rounded-full"></div>
+                    Desconectado
+                `;
+                elements.mqttStatus.className = 'text-xl font-bold text-red-400 transition-colors duration-300 flex items-center gap-2';
+                elements.mqttStatusText.textContent = 'Status: Desconectado do broker MQTT';
+                elements.mqttStatusText.className = 'mt-4 text-sm text-center text-gray-400';
+                elements.connectMqttBtn.classList.remove('hidden');
+                elements.disconnectMqttBtn.classList.add('hidden');
+            }
+
+            // Collision State
+            if (state.isColliding) {
+                elements.collisionOverlay.classList.remove('hidden', 'opacity-0');
+                elements.collisionOverlay.classList.add('opacity-40');
+                elements.collisionAlert.innerHTML = `
+                    <div class="text-2xl mb-2">🚨</div>
+                    <p class="font-medium text-red-400">COLISÃO DETECTADA!</p>
+                `;
+                elements.collisionAlert.className = 'metric-card p-4 rounded-xl text-center collision-alert';
+            } else {
+                elements.collisionOverlay.classList.add('hidden', 'opacity-0');
+                elements.collisionOverlay.classList.remove('opacity-40');
+                elements.collisionAlert.innerHTML = `
+                    <div class="text-2xl mb-2">🛑</div>
+                    <p class="font-medium text-gray-300">SEM COLISÃO</p>
+                `;
+                elements.collisionAlert.className = 'metric-card p-4 rounded-xl text-center';
+            }
+
+            // Distance Alert
+            if (state.distance < 20 && !state.isColliding) {
+                elements.distanceAlert.innerHTML = `
+                    <div class="text-2xl mb-2">⚠️</div>
+                    <p class="font-medium text-amber-400">PERIGO: PRÓXIMO!</p>
+                `;
+                elements.distanceAlert.className = 'metric-card p-4 rounded-xl text-center';
+            } else {
+                elements.distanceAlert.innerHTML = `
+                    <div class="text-2xl mb-2">✅</div>
+                    <p class="font-medium text-gray-300">DISTÂNCIA SEGURA</p>
+                `;
+                elements.distanceAlert.className = 'metric-card p-4 rounded-xl text-center';
+            }
+
+            // Button States
+            elements.startBtn.disabled = state.isRunning || !state.mqttConnected;
+            elements.stopBtn.disabled = !state.isRunning;
+            elements.speedSlider.disabled = state.isRunning;
+
+            // Statistics
+            elements.statsCollisions.textContent = state.collisions;
+            elements.statsMinDistance.textContent = `${state.minDistance.toFixed(1)}cm`;
+            elements.statsMaxSpeed.textContent = `${state.maxSpeed}%`;
+            elements.statsTotalTime.textContent = state.time;
+
+            // Update Charts
+            updateCharts();
+        }
+
+        // Chart Updates
+        function updateCharts() {
+            const now = new Date();
+            const timeLabel = now.toLocaleTimeString();
+            
+            // Distance Chart
+            state.dataPoints.distance.push(state.distance);
+            state.dataPoints.timestamps.push(timeLabel);
+            
+            if (state.dataPoints.distance.length > 20) {
+                state.dataPoints.distance.shift();
+                state.dataPoints.timestamps.shift();
+            }
+            
+            state.charts.distance.data.labels = state.dataPoints.timestamps;
+            state.charts.distance.data.datasets[0].data = state.dataPoints.distance;
+            state.charts.distance.update('none');
+
+            // Collision Rate Chart
+            const lastMinute = state.dataPoints.collisions.filter(t => 
+                (now - new Date(t)) < 60000
+            ).length;
+            
+            state.charts.collision.data.datasets[0].data = [
+                lastMinute,
+                Math.max(0, state.collisions - lastMinute),
+                state.collisions
+            ];
+            state.charts.collision.update('none');
+        }
+
+        // Timer System
+        function startTimer() {
+            setInterval(() => {
+                if (!state.isRunning) return;
+                
+                state.totalTime++;
+                const hours = Math.floor(state.totalTime / 3600);
+                const minutes = Math.floor((state.totalTime % 3600) / 60);
+                const seconds = state.totalTime % 60;
+                
+                state.time = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                elements.timer.textContent = state.time;
+                
+                // Calculate collision rate
+                if (state.totalTime > 0) {
+                    state.collisionRate = (state.collisions / state.totalTime) * 60;
+                }
+            }, 1000);
+        }
+
+        // Enhanced Simulation
+        function startSimulation() {
+            if (!state.mqttConnected) {
+                addLog('Conecte-se ao MQTT primeiro!', 'warning');
+                showNotification('Conecte-se ao MQTT antes de iniciar', 'warning');
+                return;
+            }
+            
+            state.isRunning = true;
+            state.speed = parseFloat(elements.speedSlider.value);
+            addLog('Simulação iniciada', 'success');
+            showNotification('Simulação iniciada com sucesso!', 'success');
+            updateUI();
+            startTimer();
+
+            const simulationInterval = setInterval(() => {
+                if (!state.isRunning) {
+                    clearInterval(simulationInterval);
+                    return;
+                }
+                
+                state.carX += state.speed;
+                let newDistance = 100 - state.carX;
+                state.distance = Math.max(newDistance, 0);
+                
+                if (state.distance < state.minDistance) {
+                    state.minDistance = state.distance;
+                }
+                
+                if (state.speed * 50 > state.maxSpeed) {
+                    state.maxSpeed = Math.round(state.speed * 50);
+                }
+                
+                if (state.distance < 15 && !state.isColliding) {
+                    state.isColliding = true;
+                    state.speed = 0;
+                    state.collisions++;
+                    state.dataPoints.collisions.push(new Date());
+                    
+                    addLog(`COLISÃO DETECTADA! Total: ${state.collisions}`, 'error');
+                    showNotification(`Colisão #${state.collisions} detectada!`, 'error');
+                    
+                    // Send MQTT message
+                    if (state.mqttClient && state.mqttConnected) {
+                        const message = JSON.stringify({
+                            tipo: 'colisao',
+                            mensagem: `Colisão #${state.collisions} detectada`,
+                            sensor_id: 'web_simulator',
+                            timestamp: new Date().toISOString(),
+                            distancia: state.distance,
+                            velocidade: state.speed * 50
+                        });
+                        
+                        state.mqttClient.send('vini123/colisao', message, 1, false);
+                        addLog('Mensagem MQTT enviada', 'success');
+                    }
+                    
+                    setTimeout(() => {
+                        state.isColliding = false;
+                        state.carX = 50;
+                        state.distance = 50;
+                        updateUI();
+                    }, 3000);
+                }
+                
+                if (state.carX > 100) {
+                    state.carX = 50;
+                    state.distance = 50;
+                }
+                
+                updateUI();
+            }, 100);
+        }
+
+        function stopSimulation() {
+            state.isRunning = false;
+            state.speed = 0;
+            addLog('Simulação pausada', 'warning');
+            showNotification('Simulação pausada', 'warning');
+            updateUI();
+        }
+
+        function resetSimulation() {
+            state.isRunning = false;
+            state.carX = 50;
+            state.distance = 100;
+            state.speed = 0;
+            state.collisions = 0;
+            state.isColliding = false;
+            state.time = '00:00:00';
+            state.totalTime = 0;
+            state.minDistance = 100;
+            state.maxSpeed = 0;
+            state.collisionRate = 0;
+            state.dataPoints = { distance: [], collisions: [], timestamps: [] };
+            
+            elements.timer.textContent = '00:00:00';
+            addLog('Sistema resetado completamente', 'success');
+            showNotification('Sistema resetado!', 'success');
+            updateUI();
+        }
+
+        function accelerateCar() {
+            if (!state.isRunning) {
+                addLog('Inicie a simulação primeiro!', 'warning');
+                return;
+            }
+            if (state.isColliding) {
+                addLog('Não pode acelerar durante colisão!', 'warning');
+                return;
+            }
+            
+            const originalSpeed = state.speed;
+            state.speed = Math.min(state.speed + 0.8, 2);
+            addLog('ACELERAÇÃO ATIVADA!', 'success');
+            showNotification('Aceleração ativada!', 'success');
+            updateUI();
+            
+            setTimeout(() => {
+                state.speed = originalSpeed;
+                updateUI();
+            }, 1000);
+        }
+
+        // Enhanced MQTT Connection
+        function connectMQTT() {
+            const server = elements.mqttServer.value.trim();
+            const port = parseInt(elements.mqttPort.value) || 8081;
+            const username = elements.mqttUsername.value.trim();
+            const topic = elements.mqttTopic.value.trim();
+            
+            if (!server) {
+                addLog('Insira o endereço do servidor MQTT!', 'error');
+                return;
+            }
+            
+            elements.mqttStatusText.textContent = 'Status: Conectando...';
+            elements.mqttStatusText.className = 'mt-4 text-sm text-center text-amber-400';
+            
+            try {
+                state.mqttClient = new Paho.MQTT.Client(server, port, "collision-detector-" + Math.random().toString(16).substr(2, 8));
+                
+                state.mqttClient.onConnectionLost = () => {
+                    state.mqttConnected = false;
+                    addLog('Conexão MQTT perdida', 'error');
+                    showNotification('Conexão MQTT perdida!', 'error');
+                    updateUI();
+                };
+                
+                state.mqttClient.onMessageArrived = (message) => {
+                    addLog(`MQTT [${message.destinationName}]: ${message.payloadString}`, 'info');
+                };
+                
+                const options = {
+                    onSuccess: () => {
+                        state.mqttConnected = true;
+                        addLog('Conectado ao MQTT com sucesso!', 'success');
+                        showNotification('Conectado ao MQTT!', 'success');
+                        
+                        if (topic) {
+                            state.mqttClient.subscribe(topic);
+                            addLog(`Inscrito no tópico: ${topic}`, 'success');
+                        }
+                        updateUI();
+                    },
+                    onFailure: (error) => {
+                        state.mqttConnected = false;
+                        addLog(`Falha ao conectar ao MQTT: ${error.errorMessage}`, 'error');
+                        showNotification('Falha na conexão MQTT!', 'error');
+                        updateUI();
+                    },
+                    userName: username || undefined,
+                    useSSL: port === 8883 || port === 443
+                };
+                
+                state.mqttClient.connect(options);
+            } catch (error) {
+                addLog(`Erro: ${error.message}`, 'error');
+                showNotification('Erro na conexão!', 'error');
+            }
+        }
+
+        function disconnectMQTT() {
+            if (state.mqttClient) {
+                state.mqttClient.disconnect();
+                state.mqttConnected = false;
+                addLog('Desconectado do MQTT', 'warning');
+                showNotification('Desconectado do MQTT', 'warning');
+                updateUI();
+            }
+        }
+
+        // Event Listeners
+        elements.startBtn.addEventListener('click', startSimulation);
+        elements.stopBtn.addEventListener('click', stopSimulation);
+        elements.resetBtn.addEventListener('click', resetSimulation);
+        elements.accelerateBtn.addEventListener('click', accelerateCar);
+        elements.connectMqttBtn.addEventListener('click', connectMQTT);
+        elements.disconnectMqttBtn.addEventListener('click', disconnectMQTT);
+        
+        elements.speedSlider.addEventListener('input', function(e) {
+            state.speed = parseFloat(e.target.value);
+            addLog(`Velocidade ajustada: ${Math.round(state.speed * 50)}%`, 'info');
+        });
+
+        // Initialize
+        function init() {
+            updateTimeDisplay();
+            initCharts();
+            addLog('Sistema inicializado com sucesso!', 'success');
+            updateUI();
+            feather.replace();
+        }
+
+        function updateTimeDisplay() {
+            const now = new Date();
+            document.getElementById('initialTime').textContent = `[${now.toLocaleTimeString()}]`;
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
