@@ -11,3 +11,9 @@
 1761085561: Opening websockets listen socket on port 8081.
 1761085561: mosquitto version 2.0.22 running
 1761087361: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1761671776: mosquitto version 2.0.22 starting
+1761671776: Config loaded from /mosquitto/config/mosquitto.conf.
+1761671776: Opening ipv4 listen socket on port 1883.
+1761671776: Opening ipv6 listen socket on port 1883.
+1761671776: Opening websockets listen socket on port 8081.
+1761671776: mosquitto version 2.0.22 running
