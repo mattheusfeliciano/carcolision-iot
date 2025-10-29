@@ -17,3 +17,157 @@
 1761671776: Opening ipv6 listen socket on port 1883.
 1761671776: Opening websockets listen socket on port 8081.
 1761671776: mosquitto version 2.0.22 running
+1761673577: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1761675377: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1761675819: New connection from 172.18.0.4:33097 on port 1883.
+1761675819: New client connected from 172.18.0.4:33097 as detector_colisao_pc (p2, c1, k60).
+1761675819: No will message specified.
+1761675819: Sending CONNACK to detector_colisao_pc (0, 0)
+1761675819: Received SUBSCRIBE from detector_colisao_pc
+1761675819: 	vini123/colisao (QoS 1)
+1761675819: detector_colisao_pc 1 vini123/colisao
+1761675819: Sending SUBACK to detector_colisao_pc
+1761675879: Received PINGREQ from detector_colisao_pc
+1761675879: Sending PINGRESP to detector_colisao_pc
+1761675940: Received PINGREQ from detector_colisao_pc
+1761675940: Sending PINGRESP to detector_colisao_pc
+1761676000: Received PINGREQ from detector_colisao_pc
+1761676000: Sending PINGRESP to detector_colisao_pc
+1761676060: Received PINGREQ from detector_colisao_pc
+1761676060: Sending PINGRESP to detector_colisao_pc
+1761676120: Received PINGREQ from detector_colisao_pc
+1761676120: Sending PINGRESP to detector_colisao_pc
+1761676180: Received PINGREQ from detector_colisao_pc
+1761676180: Sending PINGRESP to detector_colisao_pc
+1761676240: Received PINGREQ from detector_colisao_pc
+1761676240: Sending PINGRESP to detector_colisao_pc
+1761676300: Received PINGREQ from detector_colisao_pc
+1761676300: Sending PINGRESP to detector_colisao_pc
+1761676360: Received PINGREQ from detector_colisao_pc
+1761676360: Sending PINGRESP to detector_colisao_pc
+1761676420: Received PINGREQ from detector_colisao_pc
+1761676420: Sending PINGRESP to detector_colisao_pc
+1761676480: Received PINGREQ from detector_colisao_pc
+1761676480: Sending PINGRESP to detector_colisao_pc
+1761676540: Received PINGREQ from detector_colisao_pc
+1761676540: Sending PINGRESP to detector_colisao_pc
+1761676600: Received PINGREQ from detector_colisao_pc
+1761676600: Sending PINGRESP to detector_colisao_pc
+1761676660: Received PINGREQ from detector_colisao_pc
+1761676660: Sending PINGRESP to detector_colisao_pc
+1761676720: Received PINGREQ from detector_colisao_pc
+1761676720: Sending PINGRESP to detector_colisao_pc
+1761676780: Received PINGREQ from detector_colisao_pc
+1761676780: Sending PINGRESP to detector_colisao_pc
+1761676841: Received PINGREQ from detector_colisao_pc
+1761676841: Sending PINGRESP to detector_colisao_pc
+1761676901: Received PINGREQ from detector_colisao_pc
+1761676901: Sending PINGRESP to detector_colisao_pc
+1761676961: Received PINGREQ from detector_colisao_pc
+1761676961: Sending PINGRESP to detector_colisao_pc
+1761677021: Received PINGREQ from detector_colisao_pc
+1761677021: Sending PINGRESP to detector_colisao_pc
+1761677081: Received PINGREQ from detector_colisao_pc
+1761677081: Sending PINGRESP to detector_colisao_pc
+1761677141: Received PINGREQ from detector_colisao_pc
+1761677141: Sending PINGRESP to detector_colisao_pc
+1761677178: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1761677201: Received PINGREQ from detector_colisao_pc
+1761677201: Sending PINGRESP to detector_colisao_pc
+1761677261: Received PINGREQ from detector_colisao_pc
+1761677261: Sending PINGRESP to detector_colisao_pc
+1761677321: Received PINGREQ from detector_colisao_pc
+1761677321: Sending PINGRESP to detector_colisao_pc
+1761677381: Received PINGREQ from detector_colisao_pc
+1761677381: Sending PINGRESP to detector_colisao_pc
+1761677441: Received PINGREQ from detector_colisao_pc
+1761677441: Sending PINGRESP to detector_colisao_pc
+1761677501: Received PINGREQ from detector_colisao_pc
+1761677501: Sending PINGRESP to detector_colisao_pc
+1761677561: Received PINGREQ from detector_colisao_pc
+1761677561: Sending PINGRESP to detector_colisao_pc
+1761677621: Received PINGREQ from detector_colisao_pc
+1761677621: Sending PINGRESP to detector_colisao_pc
+1761677681: Received PINGREQ from detector_colisao_pc
+1761677681: Sending PINGRESP to detector_colisao_pc
+1761677742: Received PINGREQ from detector_colisao_pc
+1761677742: Sending PINGRESP to detector_colisao_pc
+1761677802: Received PINGREQ from detector_colisao_pc
+1761677802: Sending PINGRESP to detector_colisao_pc
+1761677862: Received PINGREQ from detector_colisao_pc
+1761677862: Sending PINGRESP to detector_colisao_pc
+1761677922: Received PINGREQ from detector_colisao_pc
+1761677922: Sending PINGRESP to detector_colisao_pc
+1761677982: Received PINGREQ from detector_colisao_pc
+1761677982: Sending PINGRESP to detector_colisao_pc
+1761678042: Received PINGREQ from detector_colisao_pc
+1761678042: Sending PINGRESP to detector_colisao_pc
+1761678102: Received PINGREQ from detector_colisao_pc
+1761678102: Sending PINGRESP to detector_colisao_pc
+1761678162: Received PINGREQ from detector_colisao_pc
+1761678162: Sending PINGRESP to detector_colisao_pc
+1761678222: Received PINGREQ from detector_colisao_pc
+1761678222: Sending PINGRESP to detector_colisao_pc
+1761678282: Received PINGREQ from detector_colisao_pc
+1761678282: Sending PINGRESP to detector_colisao_pc
+1761678342: Received PINGREQ from detector_colisao_pc
+1761678342: Sending PINGRESP to detector_colisao_pc
+1761678402: Received PINGREQ from detector_colisao_pc
+1761678402: Sending PINGRESP to detector_colisao_pc
+1761678462: Received PINGREQ from detector_colisao_pc
+1761678462: Sending PINGRESP to detector_colisao_pc
+1761678522: Received PINGREQ from detector_colisao_pc
+1761678522: Sending PINGRESP to detector_colisao_pc
+1761678582: Received PINGREQ from detector_colisao_pc
+1761678582: Sending PINGRESP to detector_colisao_pc
+1761678643: Received PINGREQ from detector_colisao_pc
+1761678643: Sending PINGRESP to detector_colisao_pc
+1761678703: Received PINGREQ from detector_colisao_pc
+1761678703: Sending PINGRESP to detector_colisao_pc
+1761678763: Received PINGREQ from detector_colisao_pc
+1761678763: Sending PINGRESP to detector_colisao_pc
+1761678823: Received PINGREQ from detector_colisao_pc
+1761678823: Sending PINGRESP to detector_colisao_pc
+1761678883: Received PINGREQ from detector_colisao_pc
+1761678883: Sending PINGRESP to detector_colisao_pc
+1761678943: Received PINGREQ from detector_colisao_pc
+1761678943: Sending PINGRESP to detector_colisao_pc
+1761678979: Saving in-memory database to /mosquitto/data//mosquitto.db.
+1761679003: Received PINGREQ from detector_colisao_pc
+1761679003: Sending PINGRESP to detector_colisao_pc
+1761679063: Received PINGREQ from detector_colisao_pc
+1761679063: Sending PINGRESP to detector_colisao_pc
+1761679123: Received PINGREQ from detector_colisao_pc
+1761679123: Sending PINGRESP to detector_colisao_pc
+1761679183: Received PINGREQ from detector_colisao_pc
+1761679183: Sending PINGRESP to detector_colisao_pc
+1761679243: Received PINGREQ from detector_colisao_pc
+1761679243: Sending PINGRESP to detector_colisao_pc
+1761679303: Received PINGREQ from detector_colisao_pc
+1761679303: Sending PINGRESP to detector_colisao_pc
+1761679363: Received PINGREQ from detector_colisao_pc
+1761679363: Sending PINGRESP to detector_colisao_pc
+1761679423: Received PINGREQ from detector_colisao_pc
+1761679423: Sending PINGRESP to detector_colisao_pc
+1761679483: Received PINGREQ from detector_colisao_pc
+1761679483: Sending PINGRESP to detector_colisao_pc
+1761679543: Received PINGREQ from detector_colisao_pc
+1761679543: Sending PINGRESP to detector_colisao_pc
+1761679560: Client detector_colisao_pc closed its connection.
+1761679561: New connection from 172.18.0.4:40255 on port 1883.
+1761679561: New client connected from 172.18.0.4:40255 as detector_colisao_pc (p2, c1, k60).
+1761679561: No will message specified.
+1761679561: Sending CONNACK to detector_colisao_pc (0, 0)
+1761679561: Received SUBSCRIBE from detector_colisao_pc
+1761679561: 	vini123/colisao (QoS 1)
+1761679561: detector_colisao_pc 1 vini123/colisao
+1761679561: Sending SUBACK to detector_colisao_pc
+1761679621: Received PINGREQ from detector_colisao_pc
+1761679621: Sending PINGRESP to detector_colisao_pc
+1761679681: Received PINGREQ from detector_colisao_pc
+1761679681: Sending PINGRESP to detector_colisao_pc
+1761679742: Received PINGREQ from detector_colisao_pc
+1761679742: Sending PINGRESP to detector_colisao_pc
+1761679743: Client detector_colisao_pc closed its connection.
+1761679744: mosquitto version 2.0.22 terminating
+1761679744: Saving in-memory database to /mosquitto/data//mosquitto.db.

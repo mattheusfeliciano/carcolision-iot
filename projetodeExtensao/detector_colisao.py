@@ -38,8 +38,29 @@ class DetectorColisao:
         # Substitui host/paths por variáveis de ambiente (para Docker)
         self.mqtt_config["broker"] = os.getenv("MQTT_BROKER", self.mqtt_config["broker"])
         self.mqtt_config["port"] = int(os.getenv("MQTT_PORT", self.mqtt_config["port"]))
-        self.data_config["data_file"] = os.getenv("DATA_FILE", str(self.data_dir / self.data_config["data_file"]))
-        self.log_config["file"] = os.getenv("LOG_FILE", str(self.log_dir / self.log_config["file"]))
+        # Data file: if env var set, use it; otherwise build a sensible path.
+        data_file_env = os.getenv("DATA_FILE")
+        if data_file_env:
+            self.data_config["data_file"] = data_file_env
+        else:
+            cfg_data_path = Path(self.data_config["data_file"])
+            # If the configured path already includes a 'data' parent, avoid duplicating
+            if cfg_data_path.parent.name == "data":
+                self.data_config["data_file"] = str(self.data_dir / cfg_data_path.name)
+            else:
+                self.data_config["data_file"] = str(self.data_dir / cfg_data_path)
+
+        # Log file: if env var set, use it; otherwise build a sensible path.
+        log_file_env = os.getenv("LOG_FILE")
+        if log_file_env:
+            self.log_config["file"] = log_file_env
+        else:
+            cfg_log_path = Path(self.log_config["file"])
+            # If the configured path already includes a 'logs' parent, avoid duplicating
+            if cfg_log_path.parent.name == "logs":
+                self.log_config["file"] = str(self.log_dir / cfg_log_path.name)
+            else:
+                self.log_config["file"] = str(self.log_dir / cfg_log_path)
 
         # Inicializações
         self.reconnect_attempts = 0

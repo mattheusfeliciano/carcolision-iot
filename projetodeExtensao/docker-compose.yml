@@ -23,4 +23,14 @@ services:
       - mosquitto
     restart: unless-stopped
 
-
+  detector:
+    build: .
+    container_name: detector_colisao
+    depends_on:
+      - mosquitto
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "5000:5000"   # Porta do Flask para o navegador
+    restart: unless-stopped
+    command: ["python", "web_server.py"]  # executa o site + detector

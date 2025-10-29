@@ -731,3 +731,5 @@
 2025-10-21 13:48:42,419 - __main__ - WARNING - Taxa alta de colisões: 19 no último minuto
 2025-10-21 13:48:42,454 - __main__ - INFO - Colisão #108 detectada: Colisão #107 detectada no sensor_a
 2025-10-21 13:48:43,359 - __main__ - WARNING - Erro ao enviar ping: 'Client' object has no attribute 'ping'
+2025-10-28 15:08:49,212 - detector_colisao - INFO - Histórico salvo com sucesso.
+2025-10-28 15:08:49,212 - detector_colisao - INFO - Sistema finalizado com segurança.
